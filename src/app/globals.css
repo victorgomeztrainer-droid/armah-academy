@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy-deep: #0D0D1A;
+  --navy: #1A1A2E;
+  --navy-light: #16213E;
+  --gold: #C9A84C;
+  --gold-light: #E8C96D;
+  --gold-dim: rgba(201, 168, 76, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  background: #F4F4F0;
+  color: #1A1A2E;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 168, 76, 0.6);
+}
+
+/* Input focus gold ring */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #C9A84C !important;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .gold-gradient {
+    background: linear-gradient(135deg, #C9A84C, #E8C96D);
+  }
+
+  .navy-gradient {
+    background: linear-gradient(180deg, #0D0D1A 0%, #1A1A2E 100%);
+  }
+
+  .glass-dark {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+  }
+
+  .card {
+    background: white;
+    border: 1px solid #EBEBEB;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  .card-hover {
+    transition: all 0.2s ease;
+  }
+  .card-hover:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(201,168,76,0.3);
+    transform: translateY(-1px);
+  }
+}
