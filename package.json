@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.72",
     "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
@@ -20,6 +21,7 @@
     "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
+    "react-pdf": "^10.4.1",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

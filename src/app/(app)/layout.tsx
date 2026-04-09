@@ -22,8 +22,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen" style={{ background: '#F4F4F0' }}>
-      <Sidebar role={profile.role} userName={profile.full_name} />
-      <MobileNav role={profile.role} />
+      <Sidebar role={profile.role ?? 'trainer'} userName={profile.full_name ?? ''} />
+      <MobileNav role={profile.role ?? 'trainer'} />
 
       {/* Mobile top bar */}
       <header className="md:hidden px-4 py-4 flex items-center justify-between"
@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Link href="/profile" className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
             style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)' }}>
             <span className="text-xs font-bold" style={{ color: '#C9A84C' }}>
-              {profile.full_name?.charAt(0).toUpperCase()}
+              {profile.full_name?.charAt(0)?.toUpperCase() ?? '?'}
             </span>
           </Link>
           <form action={logout}>

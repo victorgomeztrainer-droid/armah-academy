@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import ArmahLogo from '@/components/ui/ArmahLogo'
 import { logout } from '@/app/auth/actions'
+import { MeshGradient } from '@paper-design/shaders-react'
 
 const navItems = [
   {
@@ -70,13 +71,29 @@ interface SidebarProps {
   userName: string
 }
 
+const analyticsOnlyItem = adminItems.find((i) => i.href === '/admin/analytics')!
+
 export default function Sidebar({ role, userName }: SidebarProps) {
   const pathname = usePathname()
   const isAdmin = role === 'super_admin' || role === 'admin'
+  const isManagerOrDirector = role === 'manager' || role === 'director'
 
   return (
-    <aside className="hidden md:flex flex-col w-64 min-h-screen fixed left-0 top-0"
-      style={{ background: 'linear-gradient(180deg, #0D0D1A 0%, #1A1A2E 100%)', borderRight: '1px solid rgba(201,168,76,0.08)' }}>
+    <aside className="hidden md:flex flex-col w-64 min-h-screen fixed left-0 top-0 overflow-hidden"
+      style={{ borderRight: '1px solid rgba(201,168,76,0.08)' }}>
+
+      {/* Animated mesh gradient background */}
+      <div className="absolute inset-0" style={{ zIndex: 0 }}>
+        <MeshGradient
+          style={{ width: '100%', height: '100%' }}
+          colors={['#0D0D1A', '#1A1A2E', '#0A0A16', '#16213E']}
+          speed={0.3}
+          backgroundColor="#0D0D1A"
+        />
+      </div>
+
+      {/* All content sits above the gradient */}
+      <div className="relative flex flex-col flex-1" style={{ zIndex: 1 }}>
 
       {/* Brand */}
       <div className="px-6 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -104,6 +121,7 @@ export default function Sidebar({ role, userName }: SidebarProps) {
           )
         })}
 
+        {/* Full admin section: Users, Programs, Analytics */}
         {isAdmin && (
           <>
             <div className="pt-5 pb-2 px-3">
@@ -135,6 +153,36 @@ export default function Sidebar({ role, userName }: SidebarProps) {
             })}
           </>
         )}
+
+        {/* Manager / Director section: Analytics only */}
+        {isManagerOrDirector && (
+          <>
+            <div className="pt-5 pb-2 px-3">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
+                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'rgba(201,168,76,0.5)' }}>
+                  Analytics
+                </p>
+                <div className="flex-1 h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
+              </div>
+            </div>
+            {(() => {
+              const active = pathname.startsWith(analyticsOnlyItem.href)
+              return (
+                <Link
+                  href={analyticsOnlyItem.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    active ? 'text-[#1A1A2E]' : 'text-white/40 hover:text-white hover:bg-white/5'
+                  }`}
+                  style={active ? { background: 'linear-gradient(135deg, #C9A84C, #E8C96D)', color: '#1A1A2E' } : {}}
+                >
+                  {analyticsOnlyItem.icon}
+                  {analyticsOnlyItem.label}
+                </Link>
+              )
+            })()}
+          </>
+        )}
       </nav>
 
       {/* User + Sign out */}
@@ -144,13 +192,13 @@ export default function Sidebar({ role, userName }: SidebarProps) {
           <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
             style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)' }}>
             <span className="text-xs font-bold" style={{ color: '#C9A84C' }}>
-              {userName.charAt(0).toUpperCase()}
+              {userName?.charAt(0)?.toUpperCase() ?? '?'}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate leading-tight group-hover:text-[#C9A84C] transition-colors">{userName}</p>
+            <p className="text-white text-sm font-medium truncate leading-tight group-hover:text-[#C9A84C] transition-colors">{userName ?? 'User'}</p>
             <p className="text-xs capitalize truncate" style={{ color: 'rgba(201,168,76,0.5)' }}>
-              {role.replace('_', ' ')} · View profile
+              {role?.replace(/_/g, ' ') ?? 'trainer'} · View profile
             </p>
           </div>
         </Link>
@@ -171,6 +219,8 @@ export default function Sidebar({ role, userName }: SidebarProps) {
           </button>
         </form>
       </div>
+
+      </div>{/* end z-10 wrapper */}
     </aside>
   )
 }
