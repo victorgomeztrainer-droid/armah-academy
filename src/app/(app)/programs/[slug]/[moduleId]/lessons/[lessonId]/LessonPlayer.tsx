@@ -109,14 +109,14 @@ export default function LessonPlayer({
     ? resources.find((r) =>
         r.file_url?.toLowerCase().endsWith('.pdf') ||
         r.file_url?.includes('.pdf') ||
-        r.resource_type === 'pdf'
+        r.file_type === 'pdf'
       )
     : null
 
   // For image type — collect all image resources
   const imageResources = (isImage || (!embedUrl && !isReadingOrPresentation))
     ? resources.filter((r) =>
-        r.resource_type === 'image' ||
+        r.file_type === 'image' ||
         /\.(jpe?g|png|gif|webp|svg)(\?|$)/i.test(r.file_url ?? '')
       )
     : []
