@@ -93,11 +93,13 @@ export default function LessonPlayer({
 }: Props) {
   const [completed, setCompleted] = useState(isCompleted)
   const [loading, setLoading] = useState(false)
+  const [activeImg, setActiveImg] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
   const isPresentation = lesson.lesson_type === 'presentation'
   const isReading = lesson.lesson_type === 'reading'
+  const isImage = lesson.lesson_type === 'image'
   const isReadingOrPresentation = isReading || isPresentation
 
   const embedUrl = lesson.video_url ? getYouTubeEmbedUrl(lesson.video_url) : null
@@ -111,9 +113,19 @@ export default function LessonPlayer({
       )
     : null
 
+  // For image type — collect all image resources
+  const imageResources = (isImage || (!embedUrl && !isReadingOrPresentation))
+    ? resources.filter((r) =>
+        r.resource_type === 'image' ||
+        /\.(jpe?g|png|gif|webp|svg)(\?|$)/i.test(r.file_url ?? '')
+      )
+    : []
+
   // Resources that are NOT the main presentation PDF (shown as extra downloads)
   const extraResources = isPresentation
     ? resources.filter((r) => r.id !== pdfResource?.id)
+    : isImage
+    ? resources.filter((r) => !imageResources.find((img) => img.id === r.id))
     : resources
 
   async function markComplete() {
@@ -241,6 +253,90 @@ export default function LessonPlayer({
         </div>
       )}
 
+      {/* ── IMAGE VIEWER ───────────────────────────────────────────── */}
+      {imageResources.length > 0 && (
+        <div style={{ background: '#0D0D1A' }}>
+          {/* Header bar */}
+          <div className="flex items-center justify-between px-6 py-4"
+            style={{ borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                <svg className="w-4 h-4" style={{ color: '#C9A84C' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-white text-sm font-bold">{lesson.title}</h2>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Image {activeImg + 1} of {imageResources.length}
+                </p>
+              </div>
+            </div>
+            {/* Prev / Next */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setActiveImg(Math.max(0, activeImg - 1))}
+                disabled={activeImg === 0}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-30"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setActiveImg(Math.min(imageResources.length - 1, activeImg + 1))}
+                disabled={activeImg === imageResources.length - 1}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-30"
+                style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)' }}>
+                <svg className="w-4 h-4" style={{ color: '#C9A84C' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Active image */}
+          <div className="flex items-center justify-center px-4 py-6"
+            style={{ minHeight: '400px', background: '#0A0A14' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={activeImg}
+              src={imageResources[activeImg].file_url}
+              alt={imageResources[activeImg].title ?? lesson.title}
+              className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-2xl"
+              style={{ border: '1px solid rgba(201,168,76,0.12)' }}
+            />
+          </div>
+
+          {/* Thumbnail strip (if more than 1 image) */}
+          {imageResources.length > 1 && (
+            <div className="flex gap-2 px-6 pb-5 overflow-x-auto">
+              {imageResources.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setActiveImg(i)}
+                  className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden transition-all"
+                  style={{
+                    border: activeImg === i
+                      ? '2px solid #C9A84C'
+                      : '2px solid rgba(255,255,255,0.08)',
+                    opacity: activeImg === i ? 1 : 0.55,
+                  }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img.file_url}
+                    alt={img.title ?? `Image ${i + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── PRESENTATION PDF VIEWER ────────────────────────────────── */}
       {isPresentation && pdfResource && (
         <PresentationViewer
@@ -304,7 +400,7 @@ export default function LessonPlayer({
       )}
 
       {/* ── VIDEO PLACEHOLDER ──────────────────────────────────────── */}
-      {!embedUrl && !isReadingOrPresentation && (
+      {!embedUrl && !isReadingOrPresentation && imageResources.length === 0 && (
         <div className="bg-black w-full aspect-video flex items-center justify-center">
           <div className="text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-3">
@@ -321,7 +417,7 @@ export default function LessonPlayer({
       {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
       <div className="flex-1 max-w-3xl w-full mx-auto px-6 py-8">
 
-        {/* Video lesson title */}
+        {/* Video / Image lesson title */}
         {!isReadingOrPresentation && (
           <div className="mb-6">
             <div className="flex items-start justify-between gap-4 mb-1">
