@@ -38,6 +38,13 @@ export default async function LessonPage({
     .is('module_id', null)
     .maybeSingle()
 
+  // Inter-module quizzes (module_id NOT NULL = gates between modules)
+  const { data: moduleQuizzes } = await supabase
+    .from('quizzes')
+    .select('id, module_id, title')
+    .eq('program_id', program.id)
+    .not('module_id', 'is', null)
+
   // User progress
   const { data: progressData } = await supabase
     .from('user_progress')
@@ -86,12 +93,21 @@ export default async function LessonPage({
     (l: any) => completedIds.has(l.id) || l.id === params.lessonId
   )
 
-  // Lock helper for sidebar
+  // Inter-module quiz for current module (gate to show after finishing this module)
+  const currentModuleQuiz = (moduleQuizzes || []).find(
+    (q: any) => q.module_id === params.moduleId
+  ) ?? null
+  const currentModuleQuizPassed = currentModuleQuiz ? passedQuizIds.has(currentModuleQuiz.id) : false
+
+  // Lock helper for sidebar — locks if prev lessons incomplete OR prev module quiz not passed
   function isModuleLocked(modIdx: number): boolean {
     if (modIdx === 0) return false
     const prev = sortedModules[modIdx - 1] as any
     const prevLessons = prev?.lessons || []
-    return !prevLessons.every((l: any) => completedIds.has(l.id))
+    if (!prevLessons.every((l: any) => completedIds.has(l.id))) return true
+    const prevQuiz = (moduleQuizzes || []).find((q: any) => q.module_id === prev.id)
+    if (prevQuiz && !passedQuizIds.has(prevQuiz.id)) return true
+    return false
   }
 
   function lessonTypeIcon(type: string) {
@@ -205,6 +221,37 @@ export default async function LessonPage({
                     </Link>
                   )
                 })}
+
+                {/* Inter-module quiz gate — shown after all lessons in this module */}
+                {!locked && (() => {
+                  const modQuiz = (moduleQuizzes || []).find((q: any) => q.module_id === mod.id)
+                  if (!modQuiz) return null
+                  const allLessonsDone = modLessons.every((l: any) => completedIds.has(l.id))
+                  const quizPassed = passedQuizIds.has(modQuiz.id)
+                  return (
+                    <Link
+                      href={`/programs/${params.slug}/${mod.id}/quiz`}
+                      className="flex items-center gap-2.5 px-4 py-2 mt-0.5 transition-colors group"
+                      style={!allLessonsDone ? { opacity: 0.4, pointerEvents: 'none' } : {}}
+                    >
+                      <div
+                        className="w-4 h-4 rounded flex-shrink-0 flex items-center justify-center"
+                        style={quizPassed
+                          ? { background: '#C9A84C' }
+                          : { background: '#1A1A2E', border: '1px solid rgba(201,168,76,0.3)' }
+                        }
+                      >
+                        <svg className="w-2.5 h-2.5" style={{ color: '#C9A84C' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={quizPassed ? 'M5 13l4 4L19 7' : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'} />
+                        </svg>
+                      </div>
+                      <span className="text-[11px] font-bold group-hover:text-[#C9A84C] transition-colors truncate"
+                        style={{ color: quizPassed ? '#C9A84C' : '#1A1A2E' }}>
+                        {quizPassed ? '✓ Quiz Passed' : 'Prerequisite Quiz'}
+                      </span>
+                    </Link>
+                  )
+                })()}
               </div>
             )
           })}
@@ -251,6 +298,8 @@ export default async function LessonPage({
           userId={user.id}
           programQuizId={programQuiz?.id || null}
           allProgramLessonsDone={allProgramLessonsDone}
+          moduleQuizId={currentModuleQuiz?.id || null}
+          moduleQuizPassed={currentModuleQuizPassed}
         />
       </div>
     </div>
