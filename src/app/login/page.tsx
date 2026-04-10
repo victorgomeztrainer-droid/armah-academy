@@ -1,12 +1,54 @@
-import { login } from '@/app/auth/actions'
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import ArmahLogo from '@/components/ui/ArmahLogo'
 import { BackgroundPaths } from '@/components/ui/background-paths'
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string }
-}) {
+export default function LoginPage() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
+    const supabase = createClient()
+
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (authError) {
+      setError(authError.message)
+      setLoading(false)
+      return
+    }
+
+    // Check approval status
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_approved')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile?.is_approved) {
+        router.push('/pending-approval')
+        return
+      }
+    }
+
+    router.push('/dashboard')
+    router.refresh()
+  }
+
   return (
     <div className="min-h-screen flex" style={{ background: '#0D0D1A' }}>
 
@@ -85,14 +127,14 @@ export default function LoginPage({
             </p>
           </div>
 
-          {searchParams.error && (
+          {error && (
             <div className="mb-6 px-4 py-3 rounded-xl text-sm"
               style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#FCA5A5' }}>
-              {searchParams.error}
+              {error}
             </div>
           )}
 
-          <form action={login} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-widest mb-2"
                 style={{ color: 'rgba(201,168,76,0.7)' }}>
@@ -133,10 +175,27 @@ export default function LoginPage({
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl text-sm font-bold transition-all mt-2 relative overflow-hidden group"
-              style={{ background: 'linear-gradient(135deg, #C9A84C, #E8C96D)', color: '#0D0D1A' }}
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-sm font-bold transition-all mt-2 relative overflow-hidden"
+              style={{
+                background: loading
+                  ? 'rgba(201,168,76,0.4)'
+                  : 'linear-gradient(135deg, #C9A84C, #E8C96D)',
+                color: '#0D0D1A',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
-              <span className="relative z-10">Sign In</span>
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
