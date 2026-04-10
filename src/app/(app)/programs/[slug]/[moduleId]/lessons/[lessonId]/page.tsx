@@ -30,12 +30,13 @@ export default async function LessonPage({
     .eq('program_id', program.id)
     .order('sort_order', { ascending: true })
 
-  // Program-level quiz
+  // Program-level quiz (module_id IS NULL = final certification quiz)
   const { data: programQuiz } = await supabase
     .from('quizzes')
     .select('id')
     .eq('program_id', program.id)
-    .single()
+    .is('module_id', null)
+    .maybeSingle()
 
   // User progress
   const { data: progressData } = await supabase

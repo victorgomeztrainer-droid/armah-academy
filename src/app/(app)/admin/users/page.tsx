@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { approveUser, rejectUser, updateUserProfile, createUser } from '@/app/admin/actions'
 import { BRANDS, ALL_BRANCHES, ROLES, getRoleInfo } from '@/lib/branches'
+import SubmitButton from '@/components/ui/SubmitButton'
 
 export default async function AdminUsersPage({
   searchParams,
@@ -119,17 +120,19 @@ export default async function AdminUsersPage({
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <form action={approveUser.bind(null, u.id)}>
-                          <button type="submit"
+                          <SubmitButton
+                            loadingText="Approving..."
                             className="text-xs font-bold px-4 py-2 rounded-xl transition-colors text-white"
                             style={{ background: '#16A34A' }}>
                             Approve
-                          </button>
+                          </SubmitButton>
                         </form>
                         <form action={rejectUser.bind(null, u.id)}>
-                          <button type="submit"
-                            className="text-xs font-bold px-4 py-2 rounded-xl border border-gray-200 text-red-500 hover:border-red-200 transition-colors bg-white">
+                          <SubmitButton
+                            loadingText="Rejecting..."
+                            className="text-xs font-bold px-4 py-2 rounded-xl border border-gray-200 text-red-500 bg-white">
                             Reject
-                          </button>
+                          </SubmitButton>
                         </form>
                       </div>
                     </div>
@@ -260,11 +263,7 @@ export default async function AdminUsersPage({
                   ))}
                 </select>
               </div>
-              <button type="submit"
-                className="w-full font-bold py-2.5 rounded-xl text-sm transition-all mt-1"
-                style={{ background: 'linear-gradient(135deg, #C9A84C, #E8C96D)', color: '#1A1A2E' }}>
-                Create User
-              </button>
+              <SubmitButton loadingText="Creating user...">Create User</SubmitButton>
             </form>
           </div>
 

@@ -43,6 +43,7 @@ export default async function ProgramsPage() {
     .from('programs')
     .select('*')
     .order('is_published', { ascending: false })
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
   const { data: allLessons } = await supabase

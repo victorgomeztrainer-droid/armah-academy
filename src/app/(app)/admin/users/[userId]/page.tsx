@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { updateUserProfile } from '@/app/admin/actions'
 import { BRANDS, ROLES, getRoleInfo, getBrandForBranch } from '@/lib/branches'
+import SubmitButton from '@/components/ui/SubmitButton'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
@@ -349,11 +350,7 @@ export default async function UserDetailPage({ params }: { params: { userId: str
                   ))}
                 </select>
               </div>
-              <button type="submit"
-                className="w-full font-bold py-2.5 rounded-xl text-sm transition-all"
-                style={{ background: 'linear-gradient(135deg, #C9A84C, #E8C96D)', color: '#1A1A2E' }}>
-                Save Changes
-              </button>
+              <SubmitButton loadingText="Saving...">Save Changes</SubmitButton>
             </form>
           </div>
 

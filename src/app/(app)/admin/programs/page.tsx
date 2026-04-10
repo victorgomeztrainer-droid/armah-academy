@@ -16,6 +16,7 @@ export default async function AdminProgramsPage({
   const { data: programs } = await supabase
     .from('programs')
     .select('*, modules(id)')
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false })
 
   return (
