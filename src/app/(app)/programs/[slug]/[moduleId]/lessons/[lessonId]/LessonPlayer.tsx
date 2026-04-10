@@ -118,12 +118,14 @@ export default function LessonPlayer({
       )
     : null
 
-  // For image type — collect all image resources
+  // For image type — collect all image resources, sorted A → B by title
   const imageResources = (isImage || (!embedUrl && !isReadingOrPresentation))
-    ? resources.filter((r) =>
-        r.file_type === 'image' ||
-        /\.(jpe?g|png|gif|webp|svg)(\?|$)/i.test(r.file_url ?? '')
-      )
+    ? resources
+        .filter((r) =>
+          r.file_type === 'image' ||
+          /\.(jpe?g|png|gif|webp|svg)(\?|$)/i.test(r.file_url ?? '')
+        )
+        .sort((a, b) => (a.title ?? '').localeCompare(b.title ?? ''))
     : []
 
   // Resources that are NOT the main presentation PDF (shown as extra downloads)
@@ -598,7 +600,7 @@ export default function LessonPlayer({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              Take Certification Quiz
+              Take Certification Evaluation
             </Link>
           )}
 

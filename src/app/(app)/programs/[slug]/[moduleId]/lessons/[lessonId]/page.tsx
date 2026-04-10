@@ -276,7 +276,7 @@ export default async function LessonPage({
                   </svg>
                 </div>
                 <span className="text-[11px] font-bold text-[#1A1A2E] group-hover:text-[#C9A84C] transition-colors truncate">
-                  Final Certification Quiz
+                  Final Certification Evaluation
                 </span>
               </Link>
             </div>
