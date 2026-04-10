@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import StarButton from '@/components/ui/StarButton'
 
 interface Props {
   quiz: any
@@ -336,12 +337,15 @@ export default function QuizClient({ quiz, module, slug, userId, attempts, passe
               </Link>
             </div>
           ) : canAttempt ? (
-            <button
-              onClick={() => setStarted(true)}
-              className="w-full bg-[#1A1A2E] hover:bg-[#16213E] text-white font-semibold py-3 rounded-xl text-sm transition-colors"
-            >
-              Start Quiz
-            </button>
+            <div className="flex justify-center">
+              <StarButton onClick={() => setStarted(true)} className="w-full justify-center py-3 text-sm">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                Start Quiz
+              </StarButton>
+            </div>
           ) : (
             <div className="text-center">
               <p className="text-red-500 font-medium text-sm mb-4">No attempts remaining.</p>
