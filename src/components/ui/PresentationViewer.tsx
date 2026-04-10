@@ -12,11 +12,13 @@ interface Props {
   pdfUrl: string
   title?: string
   downloadLabel?: string
+  startPage?: number   // first page to show (1-based, default = 1)
+  endPage?: number     // last page to show (1-based, default = all)
 }
 
-export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Props) {
+export default function PresentationViewer({ pdfUrl, title, downloadLabel, startPage, endPage }: Props) {
   const [numPages, setNumPages] = useState<number>(0)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(startPage ?? 1)
   const [containerWidth, setContainerWidth] = useState(700)
   const [loadError, setLoadError] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -55,25 +57,38 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
     return () => observers.forEach((o) => o.disconnect())
   }, [numPages])
 
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages)
-    pageRefs.current = new Array(numPages).fill(null)
+  function onDocumentLoadSuccess({ numPages: total }: { numPages: number }) {
+    setNumPages(total)
+    const effectiveEnd = endPage ? Math.min(endPage, total) : total
+    const effectiveStart = startPage ?? 1
+    const count = Math.max(0, effectiveEnd - effectiveStart + 1)
+    pageRefs.current = new Array(count).fill(null)
   }
 
+  // Visible page range
+  const firstPage = startPage ?? 1
+  const lastPage = endPage && numPages > 0 ? Math.min(endPage, numPages) : numPages
+  const visiblePages = numPages > 0
+    ? Array.from({ length: Math.max(0, lastPage - firstPage + 1) }, (_, i) => firstPage + i)
+    : []
+  const visibleCount = visiblePages.length
+
+  // currentPage is absolute PDF page; slideIndex is 0-based within visible range
+  const slideIndex = Math.max(0, currentPage - firstPage)
+
   function scrollToPage(page: number) {
-    const target = pageRefs.current[page - 1]
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    const idx = page - firstPage
+    const target = pageRefs.current[idx]
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const goToPrev = useCallback(() => {
-    if (currentPage > 1) scrollToPage(currentPage - 1)
-  }, [currentPage])
+    if (currentPage > firstPage) scrollToPage(currentPage - 1)
+  }, [currentPage, firstPage])
 
   const goToNext = useCallback(() => {
-    if (currentPage < numPages) scrollToPage(currentPage + 1)
-  }, [currentPage, numPages])
+    if (currentPage < lastPage) scrollToPage(currentPage + 1)
+  }, [currentPage, lastPage])
 
   // Keyboard navigation
   useEffect(() => {
@@ -85,7 +100,7 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
     return () => window.removeEventListener('keydown', handleKey)
   }, [goToNext, goToPrev])
 
-  const pct = numPages > 0 ? Math.round((currentPage / numPages) * 100) : 0
+  const pct = visibleCount > 0 ? Math.round(((slideIndex + 1) / visibleCount) * 100) : 0
 
   return (
     <div className="flex flex-col" style={{ background: '#F0F0EC' }}>
@@ -116,7 +131,7 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
           {numPages > 0 ? (
             <>
               <span className="text-xs font-bold tabular-nums" style={{ color: '#C9A84C' }}>
-                Slide {currentPage} <span className="font-normal text-white/30">/ {numPages}</span>
+                Slide {slideIndex + 1} <span className="font-normal text-white/30">/ {visibleCount}</span>
               </span>
               <div className="w-32 h-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
                 <div
@@ -135,7 +150,7 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
           {/* Prev */}
           <button
             onClick={goToPrev}
-            disabled={currentPage <= 1}
+            disabled={currentPage <= firstPage}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-20"
             style={{ background: 'rgba(255,255,255,0.06)' }}
             title="Previous slide (←)"
@@ -148,7 +163,7 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
           {/* Next */}
           <button
             onClick={goToNext}
-            disabled={currentPage >= numPages}
+            disabled={currentPage >= lastPage}
             className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-20"
             style={{ background: 'rgba(255,255,255,0.06)' }}
             title="Next slide (→)"
@@ -228,10 +243,10 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
             }
           >
             <div className="flex flex-col gap-4 items-center">
-              {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+              {visiblePages.map((pageNum) => (
                 <div
                   key={pageNum}
-                  ref={(el) => { pageRefs.current[pageNum - 1] = el }}
+                  ref={(el) => { pageRefs.current[pageNum - firstPage] = el }}
                   className="relative w-full shadow-lg rounded-xl overflow-hidden"
                   style={{
                     maxWidth: '860px',
@@ -286,7 +301,7 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
         >
           <button
             onClick={goToPrev}
-            disabled={currentPage <= 1}
+            disabled={currentPage <= firstPage}
             className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg disabled:opacity-30 transition-all"
             style={{ background: '#1A1A2E', color: 'white' }}
           >
@@ -297,12 +312,12 @@ export default function PresentationViewer({ pdfUrl, title, downloadLabel }: Pro
           </button>
 
           <span className="text-xs text-gray-400 font-medium tabular-nums">
-            {currentPage} / {numPages}
+            {slideIndex + 1} / {visibleCount}
           </span>
 
           <button
             onClick={goToNext}
-            disabled={currentPage >= numPages}
+            disabled={currentPage >= lastPage}
             className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg disabled:opacity-30 transition-all"
             style={{ background: '#1A1A2E', color: 'white' }}
           >

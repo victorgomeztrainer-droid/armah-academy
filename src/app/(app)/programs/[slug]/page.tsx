@@ -22,12 +22,15 @@ export default async function ProgramPage({ params }: { params: { slug: string }
     .eq('program_id', program.id)
     .order('sort_order', { ascending: true })
 
-  // Fetch program-level quiz
-  const { data: programQuiz } = await supabase
+  // Fetch the final certification quiz (module_id is null = program-level)
+  const { data: quizzesData } = await supabase
     .from('quizzes')
-    .select('id, title, passing_score, max_attempts')
+    .select('id, title, passing_score, max_attempts, module_id')
     .eq('program_id', program.id)
-    .single()
+    .order('created_at', { ascending: false })
+
+  // Use the quiz with no module_id (program-level final exam)
+  const programQuiz = (quizzesData || []).find((q) => !q.module_id) ?? (quizzesData?.[0] ?? null)
 
   const { data: progressData } = await supabase
     .from('user_progress')

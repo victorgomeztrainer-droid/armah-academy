@@ -343,6 +343,8 @@ export default function LessonPlayer({
           pdfUrl={pdfResource.file_url}
           title={lesson.title}
           downloadLabel={pdfResource.title ?? 'Download PDF'}
+          startPage={lesson.pdf_start_page ?? undefined}
+          endPage={lesson.pdf_end_page ?? undefined}
         />
       )}
 
