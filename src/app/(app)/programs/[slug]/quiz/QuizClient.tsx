@@ -114,7 +114,7 @@ export default function QuizClient({
         .select('id')
         .eq('user_id', userId)
         .eq('program_id', program.id)
-        .single()
+        .maybeSingle()
 
       if (!existingCert) {
         const certNum = `ARMAH-${slug.toUpperCase()}-${new Date().getFullYear()}-${Math.floor(Math.random() * 9000) + 1000}`
