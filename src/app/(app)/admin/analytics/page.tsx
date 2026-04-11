@@ -28,15 +28,15 @@ export default async function AnalyticsPage({
   // Managers are locked to their own branch; directors/admins can filter freely
   const filterBranch = isManager
     ? (me.branch ?? null)
-    : (searchParams.branch ?? null)
+    : (searchParams.branch ? decodeURIComponent(searchParams.branch) : null)
   const filterBrand = isManager
     ? null
-    : (searchParams.brand ?? null)
+    : (searchParams.brand ? decodeURIComponent(searchParams.brand) : null)
 
   // ── Fetch users ───────────────────────────────────────────────────────────
   let userQuery = supabase.from('profiles')
     .select('id, full_name, branch, role, current_streak, longest_streak, total_study_days, last_activity_date')
-    .eq('is_approved', true)
+    .neq('is_approved', false)
 
   if (filterBranch) userQuery = userQuery.eq('branch', filterBranch)
   else if (filterBrand) {
