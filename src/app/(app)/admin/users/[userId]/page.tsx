@@ -27,7 +27,7 @@ function getLast8Weeks(sessions: { session_date: string }[]) {
   return weeks
 }
 
-export default async function UserDetailPage({ params }: { params: { userId: string } }) {
+export default async function UserDetailPage({ params, searchParams }: { params: { userId: string }, searchParams: { success?: string, error?: string } }) {
   const supabase = await createClient()
   const { data: { user: me } } = await supabase.auth.getUser()
   if (!me) redirect('/login')
@@ -87,6 +87,20 @@ export default async function UserDetailPage({ params }: { params: { userId: str
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
+
+      {/* Toast feedback */}
+      {searchParams.success && (
+        <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium"
+          style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>
+          ✓ {searchParams.success.replace(/\+/g, ' ')}
+        </div>
+      )}
+      {searchParams.error && (
+        <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium"
+          style={{ background: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
+          ✗ {searchParams.error}
+        </div>
+      )}
 
       {/* Back */}
       <Link href="/admin/users"

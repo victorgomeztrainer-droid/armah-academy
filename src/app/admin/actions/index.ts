@@ -47,18 +47,25 @@ export async function updateUserRole(userId: string, role: string) {
 
 export async function updateUserProfile(userId: string, formData: FormData) {
   const supabase = await requireAdmin()
+
   const full_name = formData.get('full_name') as string
   const role = formData.get('role') as string
   const branch = formData.get('branch') as string
 
-  await supabase.from('profiles').update({
+  const { error } = await supabase.from('profiles').update({
     full_name: full_name || undefined,
     role: role || undefined,
-    branch: branch || undefined,
+    branch: branch || null,
   }).eq('id', userId)
+
+  if (error) {
+    console.error('updateUserProfile error:', error)
+    redirect(`/admin/users/${userId}?error=` + encodeURIComponent(error.message))
+  }
 
   revalidatePath('/admin/users')
   revalidatePath(`/admin/users/${userId}`)
+  redirect(`/admin/users/${userId}?success=Profile+updated`)
 }
 
 /**

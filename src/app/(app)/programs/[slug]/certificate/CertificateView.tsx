@@ -64,7 +64,7 @@ export default function CertificateView({ certificate, program, fullName }: Prop
       const jsPDF = (await import('jspdf')).default
       const canvas = await html2canvas(certRef.current, {
         scale: 3,
-        backgroundColor: '#0D0D1A',
+        backgroundColor: '#FFFFFF',
         useCORS: true,
         logging: false,
       })
@@ -104,10 +104,10 @@ export default function CertificateView({ certificate, program, fullName }: Prop
         ref={certRef}
         className="w-full max-w-4xl relative overflow-hidden select-none"
         style={{
-          background: 'linear-gradient(145deg, #0D0D1A 0%, #1A1A2E 50%, #0A0A16 100%)',
+          background: 'linear-gradient(145deg, #FFFFFF 0%, #F8F6F0 50%, #FDF9F2 100%)',
           aspectRatio: '1.414 / 1',
           borderRadius: '16px',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.15)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.12), 0 0 0 1px rgba(201,168,76,0.3)',
         }}
       >
         {/* ── Background pattern ── */}
@@ -160,7 +160,7 @@ export default function CertificateView({ certificate, program, fullName }: Prop
 
           {/* Title */}
           <div className="mb-5">
-            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', letterSpacing: '0.25em', marginBottom: '4px' }}>
+            <p style={{ color: 'rgba(26,26,46,0.45)', fontSize: '11px', letterSpacing: '0.25em', marginBottom: '4px' }}>
               CERTIFICATE OF COMPLETION
             </p>
             <div className="flex items-center justify-center gap-3">
@@ -173,19 +173,19 @@ export default function CertificateView({ certificate, program, fullName }: Prop
           </div>
 
           {/* Recipient */}
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', letterSpacing: '0.15em', marginBottom: '8px' }}>
+          <p style={{ color: 'rgba(26,26,46,0.45)', fontSize: '12px', letterSpacing: '0.15em', marginBottom: '8px' }}>
             THIS IS TO CERTIFY THAT
           </p>
           <h1
             style={{
-              color: '#FFFFFF',
+              color: '#1A1A2E',
               fontSize: 'clamp(28px, 5vw, 44px)',
               fontFamily: 'Georgia, "Times New Roman", serif',
               fontWeight: 400,
               letterSpacing: '0.02em',
               lineHeight: 1.1,
               marginBottom: '6px',
-              textShadow: '0 0 40px rgba(201,168,76,0.2)',
+              textShadow: '0 2px 8px rgba(201,168,76,0.15)',
             }}
           >
             {fullName}
@@ -193,7 +193,7 @@ export default function CertificateView({ certificate, program, fullName }: Prop
           {/* Gold underline */}
           <div style={{ width: '80px', height: '2px', background: 'linear-gradient(90deg, transparent, #C9A84C, transparent)', marginBottom: '14px' }} />
 
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', letterSpacing: '0.15em', marginBottom: '6px' }}>
+          <p style={{ color: 'rgba(26,26,46,0.45)', fontSize: '11px', letterSpacing: '0.15em', marginBottom: '6px' }}>
             HAS SUCCESSFULLY COMPLETED
           </p>
           <h2 style={{
@@ -205,16 +205,16 @@ export default function CertificateView({ certificate, program, fullName }: Prop
           }}>
             {program.title}
           </h2>
-          <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '10px', letterSpacing: '0.2em', marginBottom: '20px' }}>
+          <p style={{ color: 'rgba(26,26,46,0.35)', fontSize: '10px', letterSpacing: '0.2em', marginBottom: '20px' }}>
             {program.category.toUpperCase()} · ARMAH ACADEMY
           </p>
 
           {/* Bottom divider + meta */}
           <div className="flex items-center gap-6">
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#FFFFFF', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>{issuedDate}</p>
-              <div style={{ height: '1px', background: 'rgba(201,168,76,0.3)', margin: '4px 0' }} />
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '8px', letterSpacing: '0.2em' }}>DATE ISSUED</p>
+              <p style={{ color: '#1A1A2E', fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>{issuedDate}</p>
+              <div style={{ height: '1px', background: 'rgba(201,168,76,0.4)', margin: '4px 0' }} />
+              <p style={{ color: 'rgba(26,26,46,0.4)', fontSize: '8px', letterSpacing: '0.2em' }}>DATE ISSUED</p>
             </div>
 
             {/* Center seal */}
@@ -229,9 +229,9 @@ export default function CertificateView({ certificate, program, fullName }: Prop
             </div>
 
             <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#FFFFFF', fontSize: '10px', fontWeight: 600, letterSpacing: '0.05em' }}>{certificate.certificate_number}</p>
-              <div style={{ height: '1px', background: 'rgba(201,168,76,0.3)', margin: '4px 0' }} />
-              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '8px', letterSpacing: '0.2em' }}>CERTIFICATE NO.</p>
+              <p style={{ color: '#1A1A2E', fontSize: '10px', fontWeight: 600, letterSpacing: '0.05em' }}>{certificate.certificate_number}</p>
+              <div style={{ height: '1px', background: 'rgba(201,168,76,0.4)', margin: '4px 0' }} />
+              <p style={{ color: 'rgba(26,26,46,0.4)', fontSize: '8px', letterSpacing: '0.2em' }}>CERTIFICATE NO.</p>
             </div>
           </div>
         </div>
