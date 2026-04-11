@@ -17,12 +17,13 @@ export default async function QuizPage({ params }: { params: { slug: string } })
 
   if (!program) notFound()
 
-  // Get quiz with questions and options (program-level quiz)
+  // Get program-level quiz only (module_id IS NULL = Final Certification Evaluation)
   const { data: quiz } = await supabase
     .from('quizzes')
     .select('*, quiz_questions(*, quiz_options(*))')
     .eq('program_id', program.id)
-    .single()
+    .is('module_id', null)
+    .maybeSingle()
 
   if (!quiz) notFound()
 
